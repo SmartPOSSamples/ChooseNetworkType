@@ -16,7 +16,7 @@ public class NetUtils {
     public static String GetNetIp() {
         String IP = "";
         try {
-            String address = "http://ip.taobao.com/service/getIpInfo2.php?ip=myip";
+            String address = "https://api.ip.sb/geoip";
             URL url = new URL(address);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setUseCaches(false);
@@ -31,25 +31,22 @@ public class NetUtils {
                     retJSON.append(tmpString + "\n");
                 }
                 JSONObject jsonObject = new JSONObject(retJSON.toString());
-                String code = jsonObject.getString("code");
+//                String code = jsonObject.getString("code");
                 Log.e("", "Prompt：" + retJSON.toString());
-                if (code.equals("0")) {
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    IP = data.getString("ip") + "(" + data.getString("country")
-                            + data.getString("area") + "Area"
-                            + data.getString("region") + data.getString("city")
-                            + data.getString("isp") + ")";
+                if(jsonObject.has("ip")){
+                    IP = jsonObject.getString("ip") + "(" + jsonObject.getString("country")
+                            + jsonObject.getString("timezone") + "timezone"
+                            + jsonObject.getString("region") + jsonObject.getString("city")
+                            + jsonObject.getString("isp") + ")";
 
                     Log.e("Prompt", "IP is:" + IP);
-                } else {
-                    IP = "";
-                    Log.e("Prompt", "Can not get IP!");
                 }
             } else {
                 IP = "";
                 Log.e("Prompt", "Can not get IP!");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             IP = "";
             Log.e("Prompt", "Can not get IP!" + e.toString());
         }
@@ -60,7 +57,7 @@ public class NetUtils {
     public static String GetNetIpForNetwork(Network network) {
         String IP = "";
         try {
-            String address = "http://ip.taobao.com/service/getIpInfo2.php?ip=myip";
+            String address = "https://api.ip.sb/geoip";
             HttpURLConnection connection = (HttpURLConnection) network.openConnection(new URL(address));
             connection.setUseCaches(false);
             connection.setRequestMethod("GET");
@@ -74,25 +71,21 @@ public class NetUtils {
                     retJSON.append(tmpString + "\n");
                 }
                 JSONObject jsonObject = new JSONObject(retJSON.toString());
-                String code = jsonObject.getString("code");
                 Log.e("", "Prompt：" + retJSON.toString());
-                if (code.equals("0")) {
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    IP = data.getString("ip") + "(" + data.getString("country")
-                            + data.getString("area") + "Area"
-                            + data.getString("region") + data.getString("city")
-                            + data.getString("isp") + ")";
+                if(jsonObject.has("ip")){
+                    IP = jsonObject.getString("ip") + "(" + jsonObject.getString("country")
+                            + jsonObject.getString("timezone") + "timezone"
+                            + jsonObject.getString("region") + jsonObject.getString("city")
+                            + jsonObject.getString("isp") + ")";
 
                     Log.e("Prompt", "IP is:" + IP);
-                } else {
-                    IP = "";
-                    Log.e("Prompt", "Can not get IP!");
                 }
             } else {
                 IP = "";
                 Log.e("Prompt", "Can not get IP!");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             IP = "";
             Log.e("Prompt", "Can not get IP!" + e.toString());
         }
