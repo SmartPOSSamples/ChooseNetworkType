@@ -33,7 +33,7 @@ public class NetUtils {
                 JSONObject jsonObject = new JSONObject(retJSON.toString());
 //                String code = jsonObject.getString("code");
                 Log.e("", "Prompt：" + retJSON.toString());
-                if(jsonObject.has("ip")){
+                if (jsonObject.has("ip")) {
                     IP = jsonObject.getString("ip") + "(" + jsonObject.getString("country")
                             + jsonObject.getString("timezone") + "timezone"
                             + jsonObject.getString("region") + jsonObject.getString("city")
@@ -72,7 +72,7 @@ public class NetUtils {
                 }
                 JSONObject jsonObject = new JSONObject(retJSON.toString());
                 Log.e("", "Prompt：" + retJSON.toString());
-                if(jsonObject.has("ip")){
+                if (jsonObject.has("ip")) {
                     IP = jsonObject.getString("ip") + "(" + jsonObject.getString("country")
                             + jsonObject.getString("timezone") + "timezone"
                             + jsonObject.getString("region") + jsonObject.getString("city")

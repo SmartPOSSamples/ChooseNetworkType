@@ -7,10 +7,10 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
@@ -21,10 +21,30 @@ import com.cloudpos.choosenetworktype.util.NetUtils;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textView;
+    @SuppressLint("HandlerLeak")
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d("handleMessage", "+" + msg);
+            textView.setText((String) msg.obj);
+        }
+    };
     private RadioButton defaultRb;
     private RadioButton wifiRb;
     private RadioButton ethernetRb;
     private RadioButton mobileRb;
+
+    //from ConnectivityManager.TYPE convert to NetworkCapabilities.TYPE
+    private static int getTransportType(int networkType) {
+        int[] from = {ConnectivityManager.TYPE_MOBILE, ConnectivityManager.TYPE_WIFI, ConnectivityManager.TYPE_ETHERNET};
+        int[] to = {NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI, NetworkCapabilities.TRANSPORT_ETHERNET};
+        for (int i = 0; i < from.length; ++i) {
+            if (from[i] == networkType) {
+                return to[i];
+            }
+        }
+        return 0;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         mobileRb = (RadioButton) findViewById(R.id.mobile_rb);
     }
 
-
     public void testType(View view) {
         if (defaultRb.isChecked()) {
             new Thread() {
@@ -50,15 +69,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }.start();
         }
-        if(wifiRb.isChecked()){
+        if (wifiRb.isChecked()) {
             chooseType(ConnectivityManager.TYPE_WIFI, true);
         }
-        if(ethernetRb.isChecked()){
+        if (ethernetRb.isChecked()) {
             chooseType(ConnectivityManager.TYPE_ETHERNET, true);
         }
-        if(mobileRb.isChecked()){
+        if (mobileRb.isChecked()) {
             chooseType(ConnectivityManager.TYPE_MOBILE, true);
         }
+    }
+
+    private void chooseType(int networkType, boolean isAllApply) {
+        new ChooseNetThread(this, networkType, isAllApply).start();
     }
 
     public void onlyWifi(View view) {
@@ -73,6 +96,17 @@ public class MainActivity extends AppCompatActivity {
         chooseType(ConnectivityManager.TYPE_ETHERNET, false);
     }
 
+    private void sendToast(Context context, int type) {
+        String netType = "";
+        if (type == NetworkCapabilities.TRANSPORT_WIFI) {
+            netType = "WIFI";
+        } else if (type == NetworkCapabilities.TRANSPORT_CELLULAR) {
+            netType = "MOBILE";
+        } else if (type == NetworkCapabilities.TRANSPORT_ETHERNET) {
+            netType = "ETHERNET";
+        }
+        Toast.makeText(context, "network type = " + netType, Toast.LENGTH_SHORT).show();
+    }
 
     class ChooseNetThread extends Thread {
         Context context;
@@ -123,42 +157,5 @@ public class MainActivity extends AppCompatActivity {
             };
             connectivityManager.requestNetwork(request, callback);
         }
-    }
-
-    //from ConnectivityManager.TYPE convert to NetworkCapabilities.TYPE
-    private static int getTransportType(int networkType) {
-        int[] from = {ConnectivityManager.TYPE_MOBILE, ConnectivityManager.TYPE_WIFI, ConnectivityManager.TYPE_ETHERNET};
-        int[] to = {NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI, NetworkCapabilities.TRANSPORT_ETHERNET};
-        for (int i = 0; i < from.length; ++i) {
-            if (from[i] == networkType) {
-                return to[i];
-            }
-        }
-        return 0;
-    }
-
-    @SuppressLint("HandlerLeak")
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Log.d("handleMessage", "+" + msg);
-            textView.setText((String) msg.obj);
-        }
-    };
-
-    private void chooseType(int networkType, boolean isAllApply) {
-        new ChooseNetThread(this, networkType, isAllApply).start();
-    }
-
-    private void sendToast(Context context, int type) {
-        String netType = "";
-        if (type == NetworkCapabilities.TRANSPORT_WIFI) {
-            netType = "WIFI";
-        } else if (type == NetworkCapabilities.TRANSPORT_CELLULAR) {
-            netType = "MOBILE";
-        } else if (type == NetworkCapabilities.TRANSPORT_ETHERNET) {
-            netType = "ETHERNET";
-        }
-        Toast.makeText(context, "network type = " + netType, Toast.LENGTH_SHORT).show();
     }
 }
